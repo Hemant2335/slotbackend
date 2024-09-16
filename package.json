@@ -1,0 +1,39 @@
+{
+  "name": "slotbackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.ts",
+    "build": "npx prisma generate --schema=./prisma/schema.prisma && rimraf dist && tsc -b .",
+    "ts.check": "tsc --project tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npx prisma generate --schema=./prisma/schema.prisma",
+    "dev": "tsc -b && nodemon src/index.ts"
+  },
+  "pre-commit": [
+    "build"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.20.0",
+    "node-cron": "^3.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.5.4",
+    "@types/node-cron": "^3.0.11",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.19.1"
+  }
+}
