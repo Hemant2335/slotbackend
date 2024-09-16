@@ -11,7 +11,7 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
     credentials: true,
-    origin: ["https://onechatfrontend.vercel.app", "http://localhost:5173", "http://ec2-13-60-193-223.eu-north-1.compute.amazonaws.com:5173"]
+    origin: ["https://slot-lac.vercel.app", "http://localhost:5173"]
 }));
 app.get("/", (req, res) => {
     res.send("Hello World");

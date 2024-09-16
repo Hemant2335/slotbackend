@@ -41,6 +41,7 @@ router.post("/BookAppointment", authentication_1.default, (req, res) => __awaite
         const appointments = yield prisma.appointments.findMany({
             where: {
                 spaceId: SpaceId,
+                status: "ACTIVE",
             },
         });
         const IsUserAlreadyBooked = appointments.find((appointment) => appointment.userId === req.body.user.id);

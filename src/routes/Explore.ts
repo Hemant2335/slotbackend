@@ -32,10 +32,11 @@ router.post("/BookAppointment", authentication, async (req, res) => {
     const appointments = await prisma.appointments.findMany({
       where: {
         spaceId: SpaceId,
+        status: "ACTIVE",
       },
     });
     const IsUserAlreadyBooked = appointments.find(
-      (appointment) => appointment.userId === req.body.user.id
+      (appointment) => appointment.userId === req.body.user.id 
     );
     if (IsUserAlreadyBooked) {
       return res
@@ -146,6 +147,7 @@ router.post("/FindAvailableSlots", async (req, res) => {
     const offlineAppointments = await prisma.offlineAppointments.findMany({
       where: {
         spaceId: SpaceId,
+        status: "ACTIVE",
       },
     });
     const currentTime = new Date().getHours();

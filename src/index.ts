@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     credentials: true,
-    origin: ["https://onechatfrontend.vercel.app", "http://localhost:5173" ,"https://slot-lac.vercel.app/"]
+    origin: ["https://slot-lac.vercel.app", "http://localhost:5173"]
 }));
 
 app.get("/", (req, res) => {

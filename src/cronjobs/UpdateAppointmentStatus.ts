@@ -22,12 +22,28 @@ cron.schedule('* * * * *', async () => {
     });
 
     const OfflineAppointments = await prisma.offlineAppointments.findMany({
-      
+      where:{
+        status: "ACTIVE"
+      }
     });
+
+    const expiredOfflineAppointments = OfflineAppointments.filter(appointment => {
+      const totimehrs = appointment.totime.split(":")[0];
+      const totimemin = appointment.totime.split(":")[1];
+      const totime = parseInt(totimehrs) * 60 + parseInt(totimemin);
+      return totime < currentMinutes;
+  });
 
     // Update those appointments to mark them as "Expired"
     for (let appointment of expiredAppointments) {
       await prisma.appointments.update({
+        where: { id: appointment.id },
+        data: { status: 'EXPIRED' }
+      });
+    }
+
+    for (let appointment of expiredOfflineAppointments) {
+      await prisma.offlineAppointments.update({
         where: { id: appointment.id },
         data: { status: 'EXPIRED' }
       });
