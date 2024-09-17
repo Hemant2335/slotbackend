@@ -142,9 +142,16 @@ router.post("/FindAvailableSlots", (req, res) => __awaiter(void 0, void 0, void 
         const offlineAppointments = yield prisma.offlineAppointments.findMany({
             where: {
                 spaceId: SpaceId,
+                status: "ACTIVE",
             },
         });
-        const currentTime = new Date().getHours();
+        const d = new Date();
+        const localTime = d.getTime();
+        const localOffset = d.getTimezoneOffset() * 60000;
+        const utc = localTime + localOffset;
+        const offset = 5.5; // UTC of India Zone is +05.30
+        const india = utc + (3600000 * offset);
+        const currentTime = new Date(india).getHours();
         console.log(currentTime);
         timeFrom = timeFrom < currentTime ? currentTime : timeFrom;
         if (timeTo < currentTime) {

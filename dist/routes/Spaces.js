@@ -117,7 +117,21 @@ router.post("/GetSpaceAppointments", authentication_1.default, (req, res) => __a
                 },
             }
         });
-        res.json({ Status: true, appointments: appointments });
+        const offlineAppointments = yield prisma.offlineAppointments.findMany({
+            where: {
+                spaceId: req.body.spaceId,
+                status: "ACTIVE"
+            },
+            select: {
+                id: true,
+                fromtime: true,
+                totime: true,
+                status: true,
+                phone: true,
+                name: true
+            }
+        });
+        res.json({ Status: true, appointments: { appointments: appointments, offlineAppointments: offlineAppointments } });
     }
     catch (error) {
         console.log(error);

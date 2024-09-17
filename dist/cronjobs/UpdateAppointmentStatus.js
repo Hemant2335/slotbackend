@@ -32,10 +32,26 @@ node_cron_1.default.schedule('* * * * *', () => __awaiter(void 0, void 0, void 0
             const totime = parseInt(totimehrs) * 60 + parseInt(totimemin);
             return totime < currentMinutes;
         });
-        const OfflineAppointments = yield prisma.offlineAppointments.findMany({});
+        const OfflineAppointments = yield prisma.offlineAppointments.findMany({
+            where: {
+                status: "ACTIVE"
+            }
+        });
+        const expiredOfflineAppointments = OfflineAppointments.filter(appointment => {
+            const totimehrs = appointment.totime.split(":")[0];
+            const totimemin = appointment.totime.split(":")[1];
+            const totime = parseInt(totimehrs) * 60 + parseInt(totimemin);
+            return totime < currentMinutes;
+        });
         // Update those appointments to mark them as "Expired"
         for (let appointment of expiredAppointments) {
             yield prisma.appointments.update({
+                where: { id: appointment.id },
+                data: { status: 'EXPIRED' }
+            });
+        }
+        for (let appointment of expiredOfflineAppointments) {
+            yield prisma.offlineAppointments.update({
                 where: { id: appointment.id },
                 data: { status: 'EXPIRED' }
             });
