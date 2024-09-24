@@ -18,6 +18,7 @@ const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const zod_1 = require("zod");
 const authentication_1 = __importDefault(require("../middlewares/authentication"));
+const __1 = require("..");
 const ValidatorAppointment = zod_1.z.object({
     SpaceId: zod_1.z.string(),
     Time: zod_1.z.string(),
@@ -36,7 +37,6 @@ const timeToMinutes = (time) => {
 router.post("/BookAppointment", authentication_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { SpaceId, Time } = ValidatorAppointment.parse(req.body);
-        const timeInMinutes = timeToMinutes(Time);
         // Check if any appointments overlap with the requested time
         const appointments = yield prisma.appointments.findMany({
             where: {
@@ -50,31 +50,14 @@ router.post("/BookAppointment", authentication_1.default, (req, res) => __awaite
                 .status(400)
                 .json({ Status: false, error: "User Already Book" });
         }
-        for (let appointment of appointments) {
-            const fromtime = timeToMinutes(appointment.fromtime);
-            const totime = timeToMinutes(appointment.totime);
-            // Check if the requested time falls within any already booked slots
-            if (timeInMinutes >= fromtime && timeInMinutes < totime) {
-                return res
-                    .status(400)
-                    .json({ Status: false, error: "Appointment Already Booked" });
-            }
-        }
-        // Create the new appointment
-        const appointment = yield prisma.appointments.create({
-            data: {
-                spaceId: SpaceId,
-                fromtime: Time,
-                totime: parseInt(Time.split(":")[1]) + 15 >= 60
-                    ? (parseInt(Time.split(":")[0]) + 1).toString().padStart(2, "0") +
-                        ":00"
-                    : Time.split(":")[0] +
-                        ":" +
-                        (parseInt(Time.split(":")[1]) + 15).toString().padStart(2, "0"),
-                userId: req.body.user.id,
-            },
-        });
-        res.json({ Status: true, appointment: appointment });
+        // After this Every Tractions will be done in Redis because One User can book only one appointment
+        __1.Redis.lPush("appointments", JSON.stringify({
+            SpaceId,
+            Time,
+            userId: req.body.user.id,
+            appointments: appointments,
+        }));
+        res.json({ Status: true, message: "Pushed to redis Successfull" });
     }
     catch (error) {
         console.log(error);
@@ -89,6 +72,7 @@ router.post("/BookOfflineAppointment", authentication_1.default, (req, res) => _
         const appointments = yield prisma.offlineAppointments.findMany({
             where: {
                 spaceId: SpaceId,
+                status: "ACTIVE",
             },
         });
         const IsUserAlreadyBooked = appointments.find((appointment) => appointment.phone === MobileNumber);
@@ -150,8 +134,8 @@ router.post("/FindAvailableSlots", (req, res) => __awaiter(void 0, void 0, void 
         const localOffset = d.getTimezoneOffset() * 60000;
         const utc = localTime + localOffset;
         const offset = 5.5; // UTC of India Zone is +05.30
-        const india = utc + (3600000 * offset);
-        const currentTime = new Date(india).getHours();
+        const india = utc + 3600000 * offset;
+        const currentTime = d.getHours();
         console.log(currentTime);
         timeFrom = timeFrom < currentTime ? currentTime : timeFrom;
         if (timeTo < currentTime) {
