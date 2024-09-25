@@ -142,7 +142,7 @@ router.post("/FindAvailableSlots", async (req, res) => {
     const utc = localTime + localOffset;
     const offset = 5.5; // UTC of India Zone is +05.30
     const india = utc + 3600000 * offset;
-    const currentTime = d.getHours();
+    const currentTime = new Date(india).getHours();
     console.log(currentTime);
     timeFrom = timeFrom < currentTime ? currentTime : timeFrom;
     if (timeTo < currentTime) {
